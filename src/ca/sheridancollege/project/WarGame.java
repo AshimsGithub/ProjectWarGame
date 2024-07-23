@@ -5,99 +5,134 @@
 package ca.sheridancollege.project;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class WarGame extends Game {
-    private Deck deck;
+    private GroupOfCards deck;
+    private GroupOfCards playArea;
 
-    public WarGame(String gameName) {
+    public WarGame(String gameName, int numPlayers) {
         super(gameName);
-        deck = new Deck();
+        this.deck = new GroupOfCards(52);
+        this.playArea = new GroupOfCards(0);
+        initializeDeck();
+        setPlayers(new ArrayList<>(numPlayers));
+    }
+
+    private void initializeDeck() {
+        String[] suits = {"Hearts", "Diamonds", "Clubs", "Spades"};
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                deck.addCard(new Card(suit, rank));
+            }
+        }
+        deck.shuffle();
     }
 
     @Override
     public void play() {
-        deck.shuffle();
-        dealCards();
+        initializeGame();
         while (!isGameOver()) {
             playRound();
         }
         declareWinner();
     }
 
-    private void dealCards() {
-        ArrayList<Player> players = getPlayers();
-        int playerCount = players.size();
-        while (!deck.showCards().isEmpty()) {
-            for (Player player : players) {
-                if (!deck.showCards().isEmpty()) {
-                    ((WarPlayer) player).receiveCard(deck.dealCard());
+    public void initializeGame() {
+        dealCards();
+    }
+
+    protected boolean isGameOver() {
+        // Check if game is over
+        return deck.size() == 0 && getPlayers().stream().allMatch(p -> p.getHand().size() == 0);
+    }
+
+    protected void playRound() {
+        System.out.println("Playing a round...");
+        playArea.clear();
+
+        List<Player> players = getPlayers();
+        Card[] cardsPlayed = new Card[players.size()];
+        for (int i = 0; i < players.size(); i++) {
+            Player player = players.get(i);
+            if (player.getHand().size() > 0) {
+                Card card = player.getHand().removeCard();
+                cardsPlayed[i] = card;
+                playArea.addCard(card);
+                System.out.println(player.getPlayerID() + " played: " + card);
+            } else {
+                cardsPlayed[i] = null;
+            }
+        }
+        compareCards(cardsPlayed);
+    }
+
+    private void compareCards(Card[] cardsPlayed) {
+        Card winningCard = null;
+        Player roundWinner = null;
+        for (int i = 0; i < cardsPlayed.length; i++) {
+            if (cardsPlayed[i] != null) {
+                if (winningCard == null || compareCardRanks(cardsPlayed[i], winningCard) > 0) {
+                    winningCard = cardsPlayed[i];
+                    roundWinner = getPlayers().get(i);
                 }
             }
         }
-    }
 
-    private boolean isGameOver() {
-        for (Player player : getPlayers()) {
-            if (((WarPlayer) player).getHandSize() == 0) {
-                return true;
+        if (roundWinner != null) {
+            System.out.println(roundWinner.getPlayerID() + " wins the round with " + winningCard);
+            for (Card card : playArea.getCards()) {
+                roundWinner.addToDiscardPile(card);
             }
-        }
-        return false;
-    }
-
-    private void playRound() {
-        ArrayList<Player> players = getPlayers();
-        ArrayList<PlayingCard> playedCards = new ArrayList<>();
-
-        for (Player player : players) {
-            playedCards.add(((WarPlayer) player).playCard());
-        }
-
-        int winnerIndex = determineRoundWinner(playedCards);
-        WarPlayer winner = (WarPlayer) players.get(winnerIndex);
-        for (PlayingCard card : playedCards) {
-            winner.receiveCard(card);
+        } else {
+            System.out.println("No winner for this round.");
         }
     }
 
-    private int determineRoundWinner(ArrayList<PlayingCard> playedCards) {
-        int winnerIndex = 0;
-        PlayingCard winningCard = playedCards.get(0);
-
-        for (int i = 1; i < playedCards.size(); i++) {
-            PlayingCard currentCard = playedCards.get(i);
-            if (beats(currentCard, winningCard)) {
-                winnerIndex = i;
-                winningCard = currentCard;
-            }
-        }
-
-        return winnerIndex;
-    }
-
-    private boolean beats(PlayingCard card1, PlayingCard card2) {
-        if (card1.getRank() == PlayingCard.Rank.ACE && card2.getRank() == PlayingCard.Rank.TWO) {
-            return false; // Ace loses to 2
-        }
-        if (card1.getRank() == PlayingCard.Rank.TWO && card2.getRank() == PlayingCard.Rank.ACE) {
-            return true; // 2 beats Ace
-        }
-        return card1.getRank().ordinal() > card2.getRank().ordinal();
+    private int compareCardRanks(Card card1, Card card2) {
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+        int rank1 = java.util.Arrays.asList(ranks).indexOf(card1.getRank());
+        int rank2 = java.util.Arrays.asList(ranks).indexOf(card2.getRank());
+        return Integer.compare(rank1, rank2);
     }
 
     @Override
     public void declareWinner() {
-        WarPlayer winner = null;
-        int maxCards = 0;
+        // Implement logic to declare the winner
+        System.out.println("Game Over! Declaring the winner...");
+    }
 
+    public void dealCards() {
+        int numPlayers = getPlayers().size();
+        int cardsPerPlayer = deck.size() / numPlayers;
         for (Player player : getPlayers()) {
-            int handSize = ((WarPlayer) player).getHandSize();
-            if (handSize > maxCards) {
-                winner = (WarPlayer) player;
-                maxCards = handSize;
+            for (int i = 0; i < cardsPerPlayer; i++) {
+                player.getHand().addCard(deck.removeCard());
             }
         }
+    }
 
-        System.out.println("The winner is " + winner.getPlayerID() + " with " + maxCards + " cards!");
+    public void shuffleDiscardPile(Player player) {
+        player.shuffleDiscardPile();
+    }
+
+    public void endGame() {
+        System.out.println("Ending the game...");
+    }
+
+    public void displayMessage(String message) {
+        System.out.println(message);
+    }
+
+    public void displayScores() {
+        System.out.println("Displaying scores...");
+        for (Player player : getPlayers()) {
+            System.out.println(player.getPlayerID() + ": " + player.getScore());
+        }
+    }
+
+    public void addPlayer(Player player) {
+        getPlayers().add(player);
     }
 }
