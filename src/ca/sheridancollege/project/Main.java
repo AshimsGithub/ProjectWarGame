@@ -4,17 +4,14 @@
  */
 package ca.sheridancollege.project;
 
-import java.util.ArrayList;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        WarGame game = new WarGame("War Card Game");
-        ArrayList<Player> players = new ArrayList<>();
-        players.add(new WarPlayer("Player 1"));
-        players.add(new WarPlayer("Player 2"));
-
-        game.setPlayers(players);
-        game.play();
+        GameApplication gameApp = new GameApplication();
+        gameApp.launch();
     }
 }
+
+
 
