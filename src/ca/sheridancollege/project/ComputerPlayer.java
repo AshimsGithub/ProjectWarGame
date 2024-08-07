@@ -5,13 +5,17 @@
 package ca.sheridancollege.project;
 
 public class ComputerPlayer extends Player {
-    public ComputerPlayer(String name) {
-        super(name);
+
+    public ComputerPlayer(String playerID) {
+        super(playerID);
     }
 
     @Override
-    public void play() {
-        // Logic for computer player to play a card
+    public Card playCard() {
+        // Play the top card from the hand
+        return getHand().removeCard();
     }
 }
+
+
 
