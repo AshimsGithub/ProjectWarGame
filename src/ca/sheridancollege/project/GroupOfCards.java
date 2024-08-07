@@ -7,12 +7,17 @@ package ca.sheridancollege.project;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public class GroupOfCards {
-    private ArrayList<Card> cards;
+    private List<Card> cards;
 
-    public GroupOfCards(int size) {
-        this.cards = new ArrayList<>(size);
+    public GroupOfCards() {
+        this.cards = new ArrayList<>();
+    }
+
+    public List<Card> getCards() {
+        return cards;
     }
 
     public void addCard(Card card) {
@@ -21,14 +26,7 @@ public class GroupOfCards {
 
     public Card removeCard() {
         if (!cards.isEmpty()) {
-            return cards.remove(cards.size() - 1);
-        }
-        return null;
-    }
-
-    public Card getTopCard() {
-        if (!cards.isEmpty()) {
-            return cards.get(cards.size() - 1);
+            return cards.remove(0);
         }
         return null;
     }
@@ -37,15 +35,11 @@ public class GroupOfCards {
         Collections.shuffle(cards);
     }
 
-    public void clear() {
-        cards.clear();
-    }
-
-    public ArrayList<Card> getCards() {
-        return cards;
-    }
-
     public int size() {
         return cards.size();
+    }
+
+    public void clear() {
+        cards.clear();
     }
 }
