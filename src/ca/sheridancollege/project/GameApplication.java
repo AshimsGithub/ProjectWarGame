@@ -1,7 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
+// * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+// * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+// 
 package ca.sheridancollege.project;
 
 import java.util.Scanner;
@@ -15,18 +15,16 @@ public class GameApplication {
     }
 
     public void displayMainMenu() {
-        // Example of how you might display the main menu
         System.out.println("Welcome to the War Game!");
-        // Code to handle user input and start a game
         startGame();
     }
 
     public void startGame() {
         Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter number of players: ");
+        System.out.print("Enter number of players (2 or 4): ");
         numberOfPlayers = scanner.nextInt();
 
-        currentGame = new WarGame("War", numberOfPlayers);
+        currentGame = new WarGame(numberOfPlayers);
 
         for (int i = 0; i < numberOfPlayers; i++) {
             System.out.print("Enter name for player " + (i + 1) + ": ");
