@@ -5,13 +5,15 @@
 package ca.sheridancollege.project;
 
 public class HumanPlayer extends Player {
-    public HumanPlayer(String name) {
-        super(name);
+
+    public HumanPlayer(String playerID) {
+        super(playerID);
     }
 
     @Override
-    public void play() {
-        // Logic for human player to play a card
+    public Card playCard() {
+        return getHand().removeCard();
     }
 }
+
 
