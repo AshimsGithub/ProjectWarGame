@@ -5,25 +5,25 @@
  */
 package ca.sheridancollege.project;
 
+/**
+ * A class that models each Player in the game. Players have an identifier, which should be unique.
+ * This class will also manage the player's cards and actions within the game.
+ * @author dancye, 2018
+ * @modifier Ashim Thapa, 2024
+ */
 public abstract class Player {
     private String playerID;
     private GroupOfCards hand;
     private GroupOfCards discardPile;
-    private int score;
 
-    public Player(String name) {
-        this.playerID = name;
-        this.hand = new GroupOfCards(0);
-        this.discardPile = new GroupOfCards(0);
-        this.score = 0;
+    public Player(String playerID) {
+        this.playerID = playerID;
+        this.hand = new GroupOfCards();
+        this.discardPile = new GroupOfCards();
     }
 
     public String getPlayerID() {
         return playerID;
-    }
-
-    public void setPlayerID(String playerID) {
-        this.playerID = playerID;
     }
 
     public GroupOfCards getHand() {
@@ -34,20 +34,6 @@ public abstract class Player {
         return discardPile;
     }
 
-    public int getScore() {
-        return score;
-    }
-
-    public void setScore(int score) {
-        this.score = score;
-    }
-
-    public abstract void play();
-
-    public void drawCard(Card card) {
-        hand.addCard(card);
-    }
-
     public void addToDiscardPile(Card card) {
         discardPile.addCard(card);
     }
@@ -55,4 +41,11 @@ public abstract class Player {
     public void shuffleDiscardPile() {
         discardPile.shuffle();
     }
+
+    public void transferDiscardPileToHand() {
+        hand.getCards().addAll(discardPile.getCards());
+        discardPile.clear();
+    }
+
+    public abstract Card playCard();
 }
