@@ -7,16 +7,16 @@ package ca.sheridancollege.project;
 import java.util.ArrayList;
 import java.util.List;
 
-public class WarGame extends Game {
+public class WarGame {
     private GroupOfCards deck;
     private GroupOfCards playArea;
+    private List<Player> players;
 
-    public WarGame(String gameName, int numPlayers) {
-        super(gameName);
-        this.deck = new GroupOfCards(52);
-        this.playArea = new GroupOfCards(0);
+    public WarGame(int numPlayers) {
+        this.deck = new GroupOfCards();
+        this.playArea = new GroupOfCards();
+        this.players = new ArrayList<>(numPlayers);
         initializeDeck();
-        setPlayers(new ArrayList<>(numPlayers));
     }
 
     private void initializeDeck() {
@@ -30,7 +30,24 @@ public class WarGame extends Game {
         deck.shuffle();
     }
 
-    @Override
+    public void addPlayer(Player player) {
+        players.add(player);
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public void dealCards() {
+        int numPlayers = players.size();
+        int cardsPerPlayer = deck.size() / numPlayers;
+        for (Player player : players) {
+            for (int i = 0; i < cardsPerPlayer; i++) {
+                player.getHand().addCard(deck.removeCard());
+            }
+        }
+    }
+
     public void play() {
         initializeGame();
         while (!isGameOver()) {
@@ -39,32 +56,31 @@ public class WarGame extends Game {
         declareWinner();
     }
 
-    public void initializeGame() {
+    private void initializeGame() {
         dealCards();
     }
 
-    protected boolean isGameOver() {
-        // Check if game is over
-        return deck.size() == 0 && getPlayers().stream().allMatch(p -> p.getHand().size() == 0);
+    private boolean isGameOver() {
+        return players.stream().anyMatch(p -> p.getHand().size() + p.getDiscardPile().size() == 52);
     }
 
-    protected void playRound() {
-        System.out.println("Playing a round...");
+    private void playRound() {
         playArea.clear();
 
-        List<Player> players = getPlayers();
         Card[] cardsPlayed = new Card[players.size()];
         for (int i = 0; i < players.size(); i++) {
             Player player = players.get(i);
+            if (player.getHand().size() == 0) {
+                player.transferDiscardPileToHand();
+            }
+
             if (player.getHand().size() > 0) {
-                Card card = player.getHand().removeCard();
-                cardsPlayed[i] = card;
-                playArea.addCard(card);
-                System.out.println(player.getPlayerID() + " played: " + card);
-            } else {
-                cardsPlayed[i] = null;
+                cardsPlayed[i] = player.playCard();
+                playArea.addCard(cardsPlayed[i]);
+                System.out.println(player.getPlayerID() + " played: " + cardsPlayed[i]);
             }
         }
+
         compareCards(cardsPlayed);
     }
 
@@ -75,7 +91,7 @@ public class WarGame extends Game {
             if (cardsPlayed[i] != null) {
                 if (winningCard == null || compareCardRanks(cardsPlayed[i], winningCard) > 0) {
                     winningCard = cardsPlayed[i];
-                    roundWinner = getPlayers().get(i);
+                    roundWinner = players.get(i);
                 }
             }
         }
@@ -97,42 +113,13 @@ public class WarGame extends Game {
         return Integer.compare(rank1, rank2);
     }
 
-    @Override
-    public void declareWinner() {
-        // Implement logic to declare the winner
-        System.out.println("Game Over! Declaring the winner...");
-    }
-
-    public void dealCards() {
-        int numPlayers = getPlayers().size();
-        int cardsPerPlayer = deck.size() / numPlayers;
-        for (Player player : getPlayers()) {
-            for (int i = 0; i < cardsPerPlayer; i++) {
-                player.getHand().addCard(deck.removeCard());
+    private void declareWinner() {
+        for (Player player : players) {
+            if (player.getHand().size() + player.getDiscardPile().size() == 52) {
+                System.out.println(player.getPlayerID() + " wins the game!");
+                return;
             }
         }
-    }
-
-    public void shuffleDiscardPile(Player player) {
-        player.shuffleDiscardPile();
-    }
-
-    public void endGame() {
-        System.out.println("Ending the game...");
-    }
-
-    public void displayMessage(String message) {
-        System.out.println(message);
-    }
-
-    public void displayScores() {
-        System.out.println("Displaying scores...");
-        for (Player player : getPlayers()) {
-            System.out.println(player.getPlayerID() + ": " + player.getScore());
-        }
-    }
-
-    public void addPlayer(Player player) {
-        getPlayers().add(player);
+        System.out.println("No winner, the game ended in a draw.");
     }
 }
