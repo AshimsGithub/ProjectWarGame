@@ -61,6 +61,7 @@ public class WarGame {
     }
 
     private boolean isGameOver() {
+        // Check if any player has all 52 cards
         return players.stream().anyMatch(p -> p.getHand().size() + p.getDiscardPile().size() == 52);
     }
 
@@ -81,29 +82,58 @@ public class WarGame {
             }
         }
 
-        compareCards(cardsPlayed);
+        resolveRound(cardsPlayed);
     }
 
-    private void compareCards(Card[] cardsPlayed) {
+    private void resolveRound(Card[] cardsPlayed) {
+        List<Integer> winningIndices = new ArrayList<>();
         Card winningCard = null;
-        Player roundWinner = null;
         for (int i = 0; i < cardsPlayed.length; i++) {
             if (cardsPlayed[i] != null) {
                 if (winningCard == null || compareCardRanks(cardsPlayed[i], winningCard) > 0) {
                     winningCard = cardsPlayed[i];
-                    roundWinner = players.get(i);
+                    winningIndices.clear();
+                    winningIndices.add(i);
+                } else if (compareCardRanks(cardsPlayed[i], winningCard) == 0) {
+                    winningIndices.add(i);
                 }
             }
         }
 
-        if (roundWinner != null) {
+        if (winningIndices.size() == 1) {
+            // Clear winner
+            Player roundWinner = players.get(winningIndices.get(0));
             System.out.println(roundWinner.getPlayerID() + " wins the round with " + winningCard);
             for (Card card : playArea.getCards()) {
                 roundWinner.addToDiscardPile(card);
             }
         } else {
-            System.out.println("No winner for this round.");
+            // Tie detected
+            System.out.println("Tie detected between players.");
+            initiateTieBreaker(winningIndices);
         }
+    }
+
+    private void initiateTieBreaker(List<Integer> tiedPlayersIndices) {
+        System.out.println("Initiating tie-breaker...");
+        List<Card> tieBreakerCards = new ArrayList<>();
+
+        for (int index : tiedPlayersIndices) {
+            Player player = players.get(index);
+            if (player.getHand().size() == 0) {
+                player.transferDiscardPileToHand();
+            }
+
+            // Draw one additional card for the tie-breaker
+            if (player.getHand().size() > 0) {
+                Card tieBreakerCard = player.playCard();
+                tieBreakerCards.add(tieBreakerCard);
+                playArea.addCard(tieBreakerCard);
+                System.out.println(player.getPlayerID() + " plays tie-breaker card: " + tieBreakerCard);
+            }
+        }
+
+        resolveRound(tieBreakerCards.toArray(new Card[0]));
     }
 
     private int compareCardRanks(Card card1, Card card2) {
