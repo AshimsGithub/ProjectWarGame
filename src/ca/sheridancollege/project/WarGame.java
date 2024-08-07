@@ -5,6 +5,7 @@
 package ca.sheridancollege.project;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class WarGame {
@@ -52,6 +53,7 @@ public class WarGame {
         initializeGame();
         while (!isGameOver()) {
             playRound();
+            removePlayersWithoutCards();
         }
         declareWinner();
     }
@@ -61,8 +63,8 @@ public class WarGame {
     }
 
     private boolean isGameOver() {
-        // Check if any player has all 52 cards
-        return players.stream().anyMatch(p -> p.getHand().size() + p.getDiscardPile().size() == 52);
+        // The game is over when only one player is left
+        return players.size() == 1;
     }
 
     private void playRound() {
@@ -124,7 +126,6 @@ public class WarGame {
                 player.transferDiscardPileToHand();
             }
 
-            // Draw one additional card for the tie-breaker
             if (player.getHand().size() > 0) {
                 Card tieBreakerCard = player.playCard();
                 tieBreakerCards.add(tieBreakerCard);
@@ -143,13 +144,23 @@ public class WarGame {
         return Integer.compare(rank1, rank2);
     }
 
-    private void declareWinner() {
-        for (Player player : players) {
-            if (player.getHand().size() + player.getDiscardPile().size() == 52) {
-                System.out.println(player.getPlayerID() + " wins the game!");
-                return;
+    private void removePlayersWithoutCards() {
+        Iterator<Player> iterator = players.iterator();
+        while (iterator.hasNext()) {
+            Player player = iterator.next();
+            if (player.getHand().size() == 0 && player.getDiscardPile().size() == 0) {
+                System.out.println(player.getPlayerID() + " has been eliminated.");
+                iterator.remove();
             }
         }
-        System.out.println("No winner, the game ended in a draw.");
+    }
+
+    private void declareWinner() {
+        if (players.size() == 1) {
+            System.out.println(players.get(0).getPlayerID() + " wins the game!");
+        } else {
+            System.out.println("The game ended in a draw.");
+        }
     }
 }
+
