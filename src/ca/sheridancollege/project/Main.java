@@ -4,14 +4,13 @@
  */
 package ca.sheridancollege.project;
 
-import java.util.Scanner;
-
 public class Main {
     public static void main(String[] args) {
-        GameApplication gameApp = new GameApplication();
-        gameApp.launch();
+        GameApplication app = new GameApplication();
+        app.launch();
     }
 }
+
 
 
 
