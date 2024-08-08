@@ -63,7 +63,6 @@ public class WarGame {
     }
 
     private boolean isGameOver() {
-        // The game is over when only one player is left
         return players.size() == 1;
     }
 
@@ -103,14 +102,12 @@ public class WarGame {
         }
 
         if (winningIndices.size() == 1) {
-            // Clear winner
             Player roundWinner = players.get(winningIndices.get(0));
             System.out.println(roundWinner.getPlayerID() + " wins the round with " + winningCard);
             for (Card card : playArea.getCards()) {
                 roundWinner.addToDiscardPile(card);
             }
         } else {
-            // Tie detected
             System.out.println("Tie detected between players.");
             initiateTieBreaker(winningIndices);
         }
@@ -138,10 +135,19 @@ public class WarGame {
     }
 
     private int compareCardRanks(Card card1, Card card2) {
-        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-        int rank1 = java.util.Arrays.asList(ranks).indexOf(card1.getRank());
-        int rank2 = java.util.Arrays.asList(ranks).indexOf(card2.getRank());
-        return Integer.compare(rank1, rank2);
+        String rank1 = card1.getRank();
+        String rank2 = card2.getRank();
+
+        if (rank1.equals("2") && rank2.equals("A")) {
+            return 1;
+        } else if (rank1.equals("A") && rank2.equals("2")) {
+            return -1;
+        } else {
+            String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
+            int rankIndex1 = java.util.Arrays.asList(ranks).indexOf(rank1);
+            int rankIndex2 = java.util.Arrays.asList(ranks).indexOf(rank2);
+            return Integer.compare(rankIndex1, rankIndex2);
+        }
     }
 
     private void removePlayersWithoutCards() {
@@ -163,4 +169,3 @@ public class WarGame {
         }
     }
 }
-
